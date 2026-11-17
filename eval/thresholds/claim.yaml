@@ -1,0 +1,31 @@
+# The claim, and the bar it has to clear, fixed before the fourth sweep of either arm.
+# Sweeps 1 to 3 of each arm are already recorded and pushed; they set s_a and s_b and
+# nothing else. Everything below is settled now so that no later number can move it.
+claim: examples
+arm_a: {way: planned, switches: {}}
+arm_b: {way: planned, switches: {tool_examples: "off"}}
+measure: wasted
+gain: B - A
+sweeps: 12
+s_a: 0.231
+s_b: 0.570
+delta: 0.5
+n_needed: 12
+price_usd: 0.35
+bar: 0.0
+group_floor: -0.5
+k: 3
+prediction:
+  arm: A
+  by: 2.0
+  stratum: routine
+  why: >-
+    Wasted calls are rejected, errored, protocol-broken and empty-search calls, so a
+    lower count is better and a positive B - A favours arm A. The tool examples show
+    the model the argument shape each tool wants; without them it guesses, and a
+    guessed argument comes back rejected or returns nothing. The pilot's three sweeps
+    put the gap at 2.37, and I expect it to settle near 2.0 over twelve. Routine is
+    where I expect the largest gap, because those tasks are the ones a run can finish
+    cleanly, so a malformed call is the only thing standing between it and a short
+    successful trace. Adversarial should show the smallest gap, since those runs waste
+    calls for reasons the examples do not touch.

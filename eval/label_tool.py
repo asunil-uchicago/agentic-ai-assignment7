@@ -54,9 +54,14 @@ def append(row_id: str, label: str, reason: str) -> None:
 
 
 def show(out: dict) -> None:
-    """One output, laid out for reading: the issue, the evidence, then the comment."""
+    """One output, laid out for reading: the issue, the evidence, then the comment.
+
+    Which system wrote the comment is deliberately not shown. It stays in the corpus,
+    where make_split.py needs it to balance the three sets, but on screen it could only
+    sway a verdict the criterion answers the same way for either system.
+    """
     issue = out["issue"]
-    print(f"\n{RULE}\n{out['id']}   (written by {out['system']})\n{RULE}")
+    print(f"\n{RULE}\n{out['id']}\n{RULE}")
     print(f"\nISSUE #{issue['number']}: {issue['title']}\n")
     print(issue["body"].rstrip())
     print(f"\n{'-' * 100}\nEVIDENCE: {len(out['evidence'])} calls, in order, with what each returned\n")
