@@ -56,5 +56,69 @@ def canonical(value) -> str:
     return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
 
+def identifiers(call: dict) -> list[str]:
+    """What a read brought back, as text: the paths it returned, or, when it returned
+    none, the values in its input, a list's items one by one."""
+    paths = [str(p) for p in (call.get("paths") or []) if p]
+    if paths:
+        return paths
+    out = []
+    for value in (call.get("input") or {}).values():
+        if isinstance(value, (list, tuple)):
+            out.extend(str(v) for v in value if v is not None)
+        elif value is not None and not isinstance(value, dict):
+            out.append(str(value))
+    return out
+
+
+def appears(identifier: str, text: str) -> bool:
+    """Whether a read's identifier turns up later: the whole of it, ignoring case, or,
+    for a path, its file name alone. Under three characters never counts."""
+    identifier, text = identifier.lower(), text.lower()
+    if len(identifier) < 3:
+        return False
+    if identifier in text:
+        return True
+    name = identifier.rsplit("/", 1)[-1]
+    return "/" in identifier and len(name) >= 3 and name in text
+
+
 def metrics(lines: list[dict], task) -> dict:
-    raise NotImplementedError("Part B, task 4")
+    """Slide 26's five metrics on one run's trace, by counting.
+
+    `lines` is the trace as a list of dicts; `task` carries the reference a good run
+    makes. Every count is defined in this module's docstring, and nothing here reads a
+    model's words: a call is a tool_call line, in order, whatever it returned.
+    """
+    reference = getattr(task, "reference", None) or {}
+    expected = set(reference.get("tools") or [])
+    calls = [line for line in lines if line.get("type") == "tool_call"]
+    used = {c.get("name") for c in calls}
+
+    seen, repeats = set(), 0
+    for call in calls:
+        key = (call.get("name"), canonical(call.get("input")))
+        repeats += key in seen
+        seen.add(key)
+
+    comments = [c for c in calls if c.get("name") in COMMENT_WRITES]
+    final = str((comments[-1].get("input") or {}).get("body") or "") if comments else ""
+
+    orphans = 0
+    for i, call in enumerate(calls):
+        if call.get("name") in WRITES:
+            continue
+        later = " ".join(canonical(d.get("input")) for d in calls[i + 1:]) + " " + final
+        orphans += not any(appears(x, later) for x in identifiers(call))
+
+    ends = [line for line in lines if line.get("type") == "run_end"]
+    end = ends[-1] if ends else {}
+
+    return {"step_count": len(calls) - int(reference.get("calls") or 0),
+            "precision": len(used & expected) / len(used) if used else None,
+            "recall": len(used & expected) / len(expected) if expected else 1.0,
+            "repeats": repeats,
+            "orphans": orphans,
+            "no_tools": not calls,
+            "cost_usd": float((end.get("totals") or {}).get("cost_usd") or 0.0),
+            "latency_s": float(end.get("elapsed_s") or 0.0)}

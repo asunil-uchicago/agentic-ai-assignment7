@@ -28,12 +28,19 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 
 from harness import LAB, ROOT
 from harness import switches as switch_board
 from harness.formats import UNFINISHED
+from harness.tasks import load_tasks, read_subset
 from harness.trace import read_trace
+
+# A call the registry's boundary refused, one that failed in the tool, and one that named
+# no tool: the three outcomes that waste a call (section 15.4).
+WASTED_OUTCOMES = ("rejected", "error", "protocol")
+SEARCH_EMPTY = re.compile(r'"count":\s*0\b')
 
 
 def finished_runs(way: str, switches: dict | None = None, root: Path = ROOT,
@@ -69,6 +76,69 @@ def call_record(run_id: str, root: Path = ROOT) -> list[dict]:
     return [json.loads(line) for line in path.read_text().splitlines() if line.strip()] if path.exists() else []
 
 
+def wasted(run_id: str, root: Path = ROOT) -> int:
+    """The claim's measure for `examples`: the calls the registry's boundary refused,
+    that failed in the tool, or that named no tool, and the searches that found
+    nothing (section 15.4)."""
+    out = 0
+    for line in call_record(run_id, root):
+        if line.get("outcome") in WASTED_OUTCOMES:
+            out += 1
+        elif line.get("role") == "search" and SEARCH_EMPTY.search(str(line.get("result") or "")):
+            out += 1
+    return out
+
+
+def duplicate_writes(state: dict, issue: int) -> int:
+    """The claim's measure for `checkpoint`: the comments beyond one, plus the open pull
+    requests beyond one, on the task's issue."""
+    where = state.get(issue) or state.get(str(issue)) or {}
+    return max(0, len(where.get("comments") or []) - 1) + max(0, len(where.get("prs") or []) - 1)
+
+
+def measure_of(claim: str, trace: list[dict], task, graded: dict, counted: dict, state: dict):
+    """Part C's measure for one run, by claim (section 15.4)."""
+    end = [line for line in trace if line.get("type") == "run_end"][-1]
+    run_id = trace[0].get("run_id")
+    if claim == "tokens":
+        return int((end.get("totals") or {}).get("total_tokens") or 0)
+    if claim == "plan":
+        return counted["repeats"]
+    if claim == "examples":
+        return wasted(run_id)
+    if claim == "checkpoint":
+        return duplicate_writes(state, task.issues[0])
+    return 100 if graded["passed"] else 0
+
+
+def result_line(arm: str, way: str, trace: list[dict], task, claim: str) -> dict:
+    """One run as a line of results/<arm>.jsonl (section 15.4)."""
+    from harness.tasks import end_state
+    from harness.tracker import Tracker
+
+    from eval.grounded import check
+    from eval.metrics import metrics
+
+    start, run_id = trace[0], trace[0].get("run_id")
+    end = [line for line in trace if line.get("type") == "run_end"][-1]
+    totals = end.get("totals") or {}
+
+    state = end_state(Tracker(flaky=False, readback_fail=False), run_id, task)
+    graded = check(task, state)
+    counted = metrics(trace, task)
+
+    return {"arm": arm, "way": way, "switches": {**switch_board.DEFAULTS, **(start.get("switches") or {})},
+            "run_id": run_id, "task": task.id, "stratum": task.stratum, "sweep": start.get("sweep"),
+            "passed": bool(graded["passed"]),
+            "facts": {"present": sum(v == "present" for v in graded["facts"].values()),
+                      "total": len(graded["facts"])},
+            "measure": measure_of(claim, trace, task, graded, counted, state),
+            "tokens": int(totals.get("total_tokens") or 0),
+            "cost_usd": float(totals.get("cost_usd") or 0.0),
+            "wall_clock_s": float(end.get("elapsed_s") or 0.0),
+            "metrics": counted}
+
+
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--arm", required=True, choices=["A", "B"])
@@ -80,8 +150,30 @@ def main(argv=None) -> int:
     p.add_argument("--scripted", action="store_true",
                    help="the runs on a scripted model, to test this script for free: writes "
                         "results/scripted_<arm>.jsonl, which the checker never reads")
-    p.parse_args(argv)
-    raise NotImplementedError("Part B, task 1")
+    a = p.parse_args(argv)
+    switches = {}
+    for pair in a.switch:
+        name, _, value = pair.partition("=")
+        switches[name.strip().lower()] = value.strip().lower()
+
+    tasks = {t.id: t for t in load_tasks(a.tasks)}
+    wanted = set(read_subset(a.subset)) if a.subset else set(tasks)
+
+    out = ROOT / "results" / f"{'scripted_' if a.scripted else ''}{a.arm}.jsonl"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    lines, skipped = [], 0
+    for trace in finished_runs(a.way, switches, scripted=a.scripted):
+        start = trace[0]
+        task = tasks.get(start.get("task"))
+        if task is None or task.id not in wanted:
+            skipped += 1
+            continue
+        lines.append(result_line(a.arm, a.way, trace, task, a.claim))
+    lines.sort(key=lambda r: (r["sweep"] or 0, r["task"]))
+    out.write_text("".join(json.dumps(r) + "\n" for r in lines), encoding="utf-8")
+    print(f"{out.relative_to(ROOT)}: {len(lines)} runs"
+          + (f", {skipped} outside the subset left out" if skipped else ""))
+    return 0
 
 
 if __name__ == "__main__":

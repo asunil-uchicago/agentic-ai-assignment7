@@ -1,0 +1,12 @@
+id: g07
+kind: single
+issues: [4610]
+stratum: adversarial
+decision: act
+expect:
+  comment: {label: bug, file: src/api/reports.ts}
+  labels: [bug]
+  pr: draft
+source: "4610's resolution: fixed in #964, report dates are checked as real calendar dates in src/api/reports.ts. The resolution records that reportRepo.ts, which the issue blames and quotes a stack frame from, was fine."
+runs: [agent-issue-4610-s01-61a545, agent-issue-4610-s01-cbaa5f]
+reference: {calls: 6, tools: [issues_read, code_search, code_read_file, issues_label, pulls_open, issues_comment]}

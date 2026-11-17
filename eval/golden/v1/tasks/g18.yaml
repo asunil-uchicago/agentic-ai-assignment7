@@ -1,0 +1,12 @@
+id: g18
+kind: single
+issues: [4628]
+stratum: should_not_act
+decision: stop
+expect:
+  comment: null
+  labels: []
+  pr: none
+source: "4628's resolution: a maintainer's own template test, deleted with no change. The body says it is a test from the maintainers' side and asks that the issue be ignored."
+runs: [agent-issue-4628-s01-f4f549]
+reference: {calls: 1, tools: [issues_read]}

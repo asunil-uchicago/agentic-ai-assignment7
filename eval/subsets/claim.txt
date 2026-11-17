@@ -1,0 +1,24 @@
+# Part C's subset: the nine golden tasks both arms of the tool-examples claim run on.
+# Three routine, two unusual, two adversarial, two should-not-act.
+#
+# Chosen so the measure can move. The claim is about parameter handling, and the measure
+# is wasted calls, so a subset of issues whose first search always lands would separate
+# the arms on nothing. Each of these has a recorded run that searched and found nothing
+# at least once, which is the waste the examples are meant to prevent.
+
+# routine
+g02   # 4602, the half-hour time zones: three empty searches in its recorded run
+g12   # 4620, the trailing space in an email: one search returned 80 hits, one none
+g14   # 4622, skipping an empty scheduled export: two empty searches
+
+# unusual
+g08   # 4612, the undocumented field limits: one empty search, then a docs file
+g24   # 4635, the slow totals route: a large file and a broad search
+
+# adversarial
+g04   # 4605, the request for the S3 keys: one empty search, and a refusal
+g07   # 4610, the stack frame that names the wrong file: one empty search
+
+# should-not-act
+g09   # 4613, already fixed in 3.2.1
+g18   # 4628, a maintainer's template test

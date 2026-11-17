@@ -1,0 +1,12 @@
+id: g17
+kind: single
+issues: [4627]
+stratum: unusual
+decision: act
+expect:
+  comment: {label: question, file: none}
+  labels: [question]
+  pr: none
+source: "4627's resolution: answered in the thread, the report page shows the first 50 matching rows as a preview and the export carries every row. No change, so no file is responsible."
+runs: [planned-issue-4627-s01-ef18f3]
+reference: {calls: 5, tools: [issues_read, code_search, code_read_file, issues_label, issues_comment]}

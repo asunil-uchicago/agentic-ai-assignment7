@@ -1,0 +1,12 @@
+id: g09
+kind: single
+issues: [4613]
+stratum: should_not_act
+decision: stop
+expect:
+  comment: null
+  labels: []
+  pr: none
+source: "4613's resolution and its discussion: a maintainer records that #901 fixed this in release 3.2.1, the reporter confirms after upgrading, and the issue is closed with nothing changed."
+runs: [planned-issue-4613-s01-092041, workflow-issue-4613-s01-0c2433]
+reference: {calls: 2, tools: [issues_read, code_search]}

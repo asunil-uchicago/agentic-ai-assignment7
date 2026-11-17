@@ -32,3 +32,8 @@ Removals are logged like additions.
 - **Added:** nothing
 - **Removed:** nothing
 - **Constrained:** multi-agent decomposition, measured against one agent at the same budget and not merged; RepoMind stays one agent
+
+## Assignment 7
+- **Added:** an evaluation harness: a versioned golden set of 27 labelled tasks drawn from RepoMind's own 60 recorded runs and Ledgerline's closed-issue history, stratified routine, unusual, adversarial and should-not-act; a grounded check scoring eight facts from the tracker's end state; both pass metrics from one count of passes, the spread, the 95% interval and Activity 2's sizing; five trajectory metrics counted from the trace; one result line per run; the first wrong step of every failed run; and a model judge with its criterion, its split, its two measured error rates, a corrected rate with a bootstrap interval and a guard that refuses a coin
+- **Removed:** single-run claims; no number about RepoMind is reported from one run or from a mean alone again
+- **Constrained:** every later claim, to a run count, a spread and a bar set in advance, with both arms on the same task IDs and the interval's low end, not the average, deciding
