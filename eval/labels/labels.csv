@@ -1,0 +1,61 @@
+id,label,reason
+j01,pass,"Every claim traces back to the issue description and src/api/reports.ts, which was read in the evidence."
+j02,fail,"cites line 41 of src/util/dates.ts, which appears in no code_search result."
+j03,fail,"claims parseStatement is called from previewStatement, which appears in no tool result"
+j04,fail,"cites src/reports.test.ts, which appears in no tool result"
+j05,pass,every claim is traceable
+j06,pass,Every claim traces directly to src/api/errors.ts and the pull request results.
+j07,pass,"Every claim traces back to the issue text, src/api/auth.ts, and the pull request result."
+j08,pass,"Every claim traces back to the issue text, docs/API.md, src/api/reports.ts, and the pull request result."
+j09,pass,Every claim traces back to src/ingest/parser.ts and the pull request results.
+j10,pass,"Every claim traces back to the issue description, src/api/uploads.ts, and the pull request result."
+j11,pass,"Every claim traces back to the issue text, src/notifications/rollup.ts, and src/db/repos/transactionRepo.ts."
+j12,fail,"cites test/reports.test.ts, which appears in no tool result"
+j13,pass,Every claim traces back to src/components/UploadForm.tsx and pull request results.
+j14,pass,Every claim traces back to src/api/auth.ts and the pull request results.
+j15,pass,Claims trace to src/api/health.ts and PR results.
+j16,pass,"Every claim traces back to src/ingest/worker.ts, src/ingest/queue.ts, and pull request results."
+j17,pass,Claims trace to src/config.ts and pull request.
+j18,pass,Claims trace to src/db/repos/reportRepo.ts and pull request.
+j19,pass,All claims trace back to src/config.ts and the pull request results.
+j20,pass,All claims trace back to src/api/health.ts.
+j21,fail,"Claims cite the import log message ""Expected 4 fields, got 2 at row 14"", which appears in no tool result."
+j22,pass,Claims trace to src/export/scheduler.ts and pull request results.
+j23,fail,parsePage clamps pageSize rather than rejecting values above 100 with a validation error.
+j24,pass,Claims trace to src/api/reports.ts and docs/API.md.
+j25,pass,Claims trace to src/util/dates.ts and pull request results.
+j26,pass,Claims trace to src/ingest/dedupe.ts and PR results.
+j27,pass,Claims trace to src/export/xlsx.ts and pull request results.
+j28,pass,Claims trace to docs/ARCHITECTURE.md and src/notifications/rollup.ts.
+j29,fail,Cites unverified error message not in evidence.
+j30,pass,Claims trace to src/notifications/rollup.ts and PR results.
+j31,pass,"Claims trace to src/exportUtils.ts, src/export/csv.ts, and pull request results."
+j32,pass,"Claims trace to docs/API.md, src/util/money.ts, and pull request results."
+j33,pass,Every claim traces back to src/export/xlsx.ts and pull request results.
+j34,fail,"cites line 11 of src/report.tsx for the small tag, but the code read file shows it on line 8"
+j35,pass,every claim traces to src/util/money.ts and src/ingest/schema.ts
+j36,pass,every claim traces to src/components/UploadForm.tsx and pull request results.
+j37,fail,cites 401 bearer token error not in evidence.
+j38,pass,"every claim traces to src/api/reports.ts, src/export/scheduler.ts, and pull request results."
+j39,pass,every claim traces to src/report.tsx and pull request results.
+j40,fail,quotes a maintainer remark that appears nowhere in the issue or tool results; discussion was none.
+j41,fail,"cites src/components/ReportForm.tsx and its name-length check, which appear in no tool result."
+j42,pass,every claim traces to src/api/errors.ts and pull request results
+j43,pass,"every claim traces to the fr.json search hits, src/export/scheduler.ts, src/notifications/templates.ts, and pull request results."
+j44,pass,every claim traces to src/util/pagination.ts and pull request results.
+j45,pass,"every claim traces to src/components/Toast.tsx, src/i18n/index.ts, the fr.json and components search hits, and pull request results."
+j46,fail,"cites ""312 imported CLP rows"", a count appearing in no tool result or the issue."
+j47,fail,"claims parseAmount accepts a trailing minus ""75-""; the code only handles a leading ""-"" or parentheses."
+j48,fail,quotes a maintainer's earlier remark that appears in no tool result; the issue had no discussion.
+j49,fail,cites docs/PERFORMANCE.md and its recommendation; that file appears in no tool result.
+j50,pass,every claim traces to src/exportUtils.ts and pull request results.
+j51,pass,"every claim traces to src/db/repos/transactionRepo.ts and src/notifications/rollup.ts, whose docstring states the Monday week."
+j52,pass,"every claim traces to src/components/Toast.tsx, the fr.json hit, the locale search results, and pull request results."
+j53,pass,"every claim traces to docs/API.md, src/util/money.ts, and pull request results"
+j54,pass,"every claim traces to src/ingest/dedupe.ts, src/ingest/worker.ts, the issue discussion, and pull request results."
+j55,fail,"claims failed uploads go to a bucket quarantine folder, which appears in no tool result"
+j56,pass,every claim traces to src/ingest/dedupe.ts and the issue text.
+j57,pass,"every claim traces to src/api/reports.ts, src/db/repos/transactionRepo.ts, and src/components/ReportTable.tsx."
+j58,pass,"every claim traces to src/i18n/fr.json, src/export/scheduler.ts, src/notifications/templates.ts, and pull request results."
+j59,fail,cites a DEFAULT_DELIMITER constant that does not appear in parser.ts or any tool result.
+j60,pass,"every claim traces to src/api/uploads.ts and pull request results; the latin1 cause is a diagnosis, not a cited artifact."
