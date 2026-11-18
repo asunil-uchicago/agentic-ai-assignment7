@@ -687,24 +687,36 @@
   },
   "judge": {
     "split": {
-      "examples": 0,
-      "tuning": 0,
-      "test": 0
+      "examples": 9,
+      "tuning": 26,
+      "test": 25
     },
-    "model": null,
-    "tpr": null,
-    "tnr": null,
-    "p": null,
-    "corrected": null,
-    "interval": null,
-    "coin": null,
-    "flip_rate": null,
+    "model": "gpt-4o-mini-2024-07-18",
+    "tpr": 0.5263157894736842,
+    "tnr": 0.6666666666666666,
+    "p": 0.7,
+    "corrected": 1.0,
+    "interval": [
+      0.0,
+      1.0
+    ],
+    "coin": false,
+    "flip_rate": 0.32,
     "majority": {
-      "tpr": null,
-      "tnr": null,
-      "kept": null
+      "tpr": 0.631578947368421,
+      "tnr": 0.8333333333333334,
+      "kept": true
     },
-    "moved_share": null,
-    "by_system": {}
+    "moved_share": 0.52,
+    "by_system": {
+      "claude-haiku-5-5": {
+        "tpr": 0.7,
+        "tnr": 0.6666666666666666
+      },
+      "claude-sonnet-5-5": {
+        "tpr": 0.3333333333333333,
+        "tnr": 0.6666666666666666
+      }
+    }
   }
 }

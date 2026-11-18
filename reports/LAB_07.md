@@ -236,23 +236,113 @@ issues_comment      stop              1
 
 ## Part D · Validate a judge
 
-- The criterion's lines, and what labelling added to them:
-- The split, and when it was committed:
-- The judge: its model and version, and its TPR and TNR on the test set:
-- Its pass rate on the recorded runs, corrected, with its interval:
-- Its flip rate, and whether a majority of three was kept:
-- What moved on the reformatted and lengthened versions:
-- Its rates on each system:
-- What validating the judge still needs:
+- **The criterion's lines, and what labelling added to them:** nine kinds of unsupported
+  citation, each written against what the sixty runs' evidence actually holds rather than
+  against what a comment could go wrong about in principle. Labelling put 17 of the sixty
+  in the fail column: a file never read 4 (`j04`, `j12`, `j41`, `j49`, the first two of
+  them test files, which is kind 3 by another route), an error or log line the issue does
+  not contain 4 (`j21`, `j23`, `j29`, `j37`), a line number no read showed 2 (`j02`,
+  `j34`), a claim about history or intent 2 (`j40`, `j48`), and one each of a symbol
+  nothing returned (`j59`), a relationship neither read establishes (`j03`) and a quantity
+  nothing shows (`j46`). Two fit none of the nine. `j47` says `parseAmount` accepts a
+  trailing minus where the file that was read handles only a leading minus and
+  parentheses: the evidence contradicts that claim rather than failing to support it, and
+  all nine kinds are about absence. `j55` says failed uploads are kept in the bucket's
+  quarantine folder, a statement about what the system does in a case no file shown
+  describes. Both were forced into the nearest existing line while labelling, which is
+  exactly what the criterion's closing note predicts happens to a defect with no line of
+  its own. Writing the two lines properly would mean labelling all sixty again, and the
+  split is committed, so the only amendment made was the one that changes no label: a
+  call's input is part of the record, which the labelling had already assumed and the
+  judge prompt needed stated. It is declared in `eval/judge/criterion.md`.
 
-## Note on the `fixtures/judge/` integrity flag
+- **The split, and when it was committed:** 9 examples, 26 tuning, 25 test, seeded at 7
+  and balanced on both the verdict and the system that wrote the comment, so no set is one
+  writer's work. Committed in `2a800cc` at 2026-11-17 21:02:22, before `eval/judge.py` and
+  `prompts/judge.md` existed in the history at all; those went up in `48f5e04` at 23:28:44.
+  That ordering is the entire guarantee, and it is why the test labels could not have
+  shaped the prompt. The prompt was tuned against the 9 and the 26 only, across six
+  versions and nine metered sessions in `runs/judge/`, and no test item was judged or read
+  until the prompt was frozen and pushed.
 
-The fixtures are unmodified. `sha()` at `checks/check_07.py:135` folds
-`str(f.relative_to(path))` into the hash, which yields `outputs\j01.json` on Windows and
-`outputs/j01.json` elsewhere. Hashing the same bytes with `.as_posix()` reproduces the
-expected `0920675979cd96a9` exactly. `fixtures/judge/` is the only pinned directory with
-a nested subdirectory, which is why the two flat ones do not flag.
+- **The judge: its model and version, and its TPR and TNR on the test set:** `gpt-4o-mini`,
+  served as the dated snapshot `gpt-4o-mini-2024-07-18`, read from the verdict lines rather
+  than the alias. On run 1, TPR 0.526 and TNR 0.667, summing to 1.193. The coin guard
+  refuses any judge whose rates sum within 0.1 of 1, so this clears the guard by 0.093 and
+  nothing more. Runs 2 and 3, same prompt, same 25 items, sum to 1.412 and 1.465. The gap
+  between those three says more about the spread than any one of them says about the judge.
+
+- **Its pass rate on the recorded runs, corrected, with its interval:** 14 of the 20
+  recorded agent runs that posted a comment were judged grounded, a raw rate of 0.700.
+  Correcting it with `(p + TNR - 1) / (TPR + TNR - 1)` gives 1.90, which clips to 1.000.
+  The bootstrap interval is [0.000, 1.000]: of 2000 resamples, 484 landed inside the coin
+  band and were dropped, and most of the 1513 that survived clipped at one end or the
+  other. The corrected figure is not a measurement. A denominator of 0.193 multiplies every
+  error in the two rates by about five, and the interval is the honest report of that. This
+  test set cannot bound the true grounded rate at all, and the right reading of 1.000 is
+  "unknown", not "perfect".
+
+- **Its flip rate, and whether a majority of three was kept:** 8 of the 25 test items
+  changed verdict across the three runs, a flip rate of 0.32, listed by id in
+  `eval/judge/for_a_person.txt`. A majority of three lifts TPR to 0.632 and TNR to 0.833,
+  summing to 1.465 against run 1's 1.193, so it was kept. Three runs cost three times one
+  and buy a judge that is meaningfully less bad. The same instability showed in tuning:
+  two runs of the frozen prompt over the 35 tuning and example items returned identical
+  TPR and TNR, which looked like stability until the per-item comparison showed 8 of 35
+  had flipped and the flips had cancelled. Matching aggregates are not a steady judge.
+
+- **What moved on the reformatted and lengthened versions:** 13 of the 25 moved, a share
+  of 0.52, and the direction is the finding. The list version, the same content set as
+  bullets, moved 6 and made the judge more lenient: 14 of 25 passed against run 1's 12. The
+  long version moved 10 and made it stricter: 10 of 25 passed. The claims are identical in
+  all three. A judge whose verdict changes on more than half the items when only the
+  presentation changes is reading format, which is the one thing the criterion tells it to
+  ignore.
+
+- **Its rates on each system:** the two TNRs match exactly at 0.667, but TPR is 0.700 on
+  the Haiku-written comments and 0.333 on the Sonnet-written ones. The judge fails two of
+  every three grounded Sonnet comments. Sonnet's are the longer comments, which lines up
+  with the long version being judged more harshly, so the likely mechanism is that the
+  judge penalises length and length happens to track the writer. One overall TPR of 0.526
+  would have hidden a bias large enough to change which system this evaluation recommends.
+
+- **What validating the judge still needs:** three things, in order. First, more negatives.
+  The sixty came out 43 pass to 17 fail, so the test set holds 6 fails and the whole of TNR
+  rests on them; one verdict moves it by 0.167. The corpus needs labelling toward a
+  balance, not toward whatever the runs produced. Second, a judge that does not read
+  format: the 0.52 moved share says the next prompt should be tuned against the reformatted
+  variants rather than the originals, so that invariance is what gets optimised instead of
+  agreement on one presentation. Third, the two criterion lines that labelling exposed and
+  the split then froze, contradiction and unshown behaviour. Those need writing down and
+  all sixty labelling again against the fuller criterion, which makes a new corpus rather
+  than a patch to this one. My own labelling is not clean either: tuning surfaced `j25`, an
+  examples-set item I marked pass whose comment cites `docs/API.md`, a file no call opened.
+  I left it as labelled, because relabelling after seeing the judge's output is how a
+  held-out set stops being held out, and one slip in the nine I have since reread is a rate
+  worth knowing when the labels are the ground truth. Until all three are done, the honest
+  use of this judge is as a filter that flags comments for a person, not as a number in a
+  report. Its own interval says the same.
+
+## Two things I ran into on Windows
+
+**The `fixtures/judge/` integrity flag.** I had not touched the fixtures, so I went
+looking for the cause. `sha()` at `checks/check_07.py:135` folds
+`str(f.relative_to(path))` into the hash, which gives `outputs\j01.json` here and
+`outputs/j01.json` elsewhere. I rehashed the same bytes with `.as_posix()` and got the
+expected `0920675979cd96a9` exactly, so the contents match the course copy and only the
+separator differs. `fixtures/judge/` is the only pinned directory with a nested
+subdirectory, which is why the two flat ones do not flag.
+
+**The 4 points under "The maths".** The section told me 0 tests ran, which did not match
+`python -m unittest tests.test_eval` passing 18. `checks/check_07.py:375` opens the
+runner's stream with `open("/dev/null", "w")`, and that raises `FileNotFoundError` here
+before the first test executes. I ran those same two lines with `os.devnull` and got 18
+run, 0 failures, 0 errors.
 
 ## AI assistance
 
-Which tool, what it wrote, and what you checked. No assistant writes or suggests a label.
+I used Gemini Web App and Claude Code to better understand the repository. I also used
+Claude Code to help draft the prompts and report, and to diagnose the two Windows issues
+described in the section above. I used GitHub Copilot autocompletion while coding and Claude
+to debug any errors I had. I also made sure to manually verify any work done by AI. All 60
+labels in `eval/labels/labels.csv` are mine, done manually.

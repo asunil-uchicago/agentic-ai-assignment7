@@ -17,7 +17,12 @@ Exactly two sources, and nothing else:
 
 1. **The issue**, its title, its body and its discussion, as `issues_read` returned it.
 2. **What RepoMind's tools returned on this run**, every entry in the output's
-   `evidence` list, in order, with its full result.
+   `evidence` list, in order, with its full result. An entry carries the input RepoMind
+   sent as well as the result that came back, and both are part of the record. A
+   `pulls_open` entry's body is the proposal RepoMind wrote itself, so a comment that
+   describes its own proposal, names the pull request number the call returned, or names
+   the file that body names is reporting what it did on this run, not importing an
+   outside fact.
 
 Anything else is unsupported, however true it may be in the world. The judge is not
 asked whether a claim is correct; it is asked whether this run had any way of knowing it.
@@ -84,10 +89,21 @@ sixty runs' evidence actually contains.
 
 ## Notes on applying it
 
-- Judge the comment as posted, not the pull request body beside it.
+- Judge the comment as posted, not the pull request body beside it. That line fixes
+  what is under judgement, not what counts as evidence: the comment is the text being
+  judged, and the pull request body is part of the record it may draw on.
 - One unsupported citation is enough to fail. Do not weigh how much of the comment was
   fine.
 - When the criterion does not decide an output, the missing line is added here, every
   output that line changes is labelled again, and the change is recorded in the report.
   A judge cannot report a defect its criterion has no line for: the defect is forced into
   another line, or dropped.
+
+## Amendments
+
+- **A call's input is part of the record** (the second source above, and the first note).
+  Written out in full on 17 Nov 2026, after all sixty labels were in, because the judge
+  prompt needed it said plainly and the criterion had left it implicit. It changed no
+  label: the labelling had already read it that way, which is what the reasons ending
+  "and pull request results" record. Declared here, and in the report, because the rule
+  below is that a line added later is declared rather than quietly applied.
