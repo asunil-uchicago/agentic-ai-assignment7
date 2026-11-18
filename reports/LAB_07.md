@@ -120,42 +120,119 @@ off the run, neither task could ever fail.
 
 - **One table from your Part C results, as the harness reports it (runs, spread, pass@k and pass^k with *k*):**
 
-  *Waiting on Part C's runs.*
+  | Arm | Runs | Measure: mean (SD) | pass@3 | pass^3 |
+  |---|---|---|---|---|
+  | A, examples on | 45 | 2.378 (0.390) | 0.111 | 0.011 |
+  | B, examples off | 45 | 5.044 (0.435) | 0.211 | 0.044 |
+
+  *k* is 3: with five sweeps a task has five runs, and three is the largest *k* that still
+  leaves the counting form room to separate the arms. `pass^3` is computed as
+  `C(c, 3) / C(n, 3)`, never as `pass@1` cubed, which slide 10 warns is biased.
 
 ## Part C · Settle one claim
 
-- The claim, its two arms, the measure and the sign of the gain:
-- The first three sweeps: each arm's *s*, and the cost of one sweep:
-- *δ*, the sweeps it needs, and the price (slide 55):
-- The bar and the group rule, as committed, and the commit:
+- **The claim, its two arms, the measure and the sign of the gain:** the tool examples in
+  the prompt earn their tokens. Arm A is `planned` with examples on, its default; arm B is
+  `planned` with `TOOL_EXAMPLES=off`, nothing else changed. The measure is a run's wasted
+  calls: every call whose outcome is `rejected`, `error` or `protocol`, plus every search
+  whose result carries `"count": 0`. The gain is signed `B - A`, so a positive gain means
+  arm B wasted more and the examples helped. Model `gpt-4o-mini`, served as the dated
+  snapshot `gpt-4o-mini-2024-07-18`, read from the runs' `model_call` lines rather than the
+  alias in `run_start`.
+
+- **The first three sweeps: each arm's *s*, and the cost of one sweep:** *s*<sub>A</sub> 0.231,
+  *s*<sub>B</sub> 0.570, over the nine tasks of `eval/subsets/claim.txt`. One sweep costs
+  $0.0158 in arm A and $0.0132 in arm B.
+
+- **δ, the sweeps it needs, and the price (slide 55):** δ is 0.5 wasted calls per task, the
+  smallest gap worth turning the examples back on for. `sweeps_needed(0.231, 0.570, 0.5)`
+  is 12, priced at 12 × 2 arms × $0.0145 a sweep, or $0.35. The protocol fixes five sweeps
+  per arm, and five resolves a gap of 0.77. I ran twelve before noticing; those runs are in
+  `runs/discarded/`, and they change nothing, since the difference over twelve sweeps is
+  2.694 against 2.667 over five. Sizing for 0.5 turned out conservative by a wide margin:
+  the gap that exists is 2.667, more than five times δ.
+
+- **The bar and the group rule, as committed, and the commit:** the interval's low end must
+  clear a bar of 0.0, and no stratum's gain may fall below a floor of -0.5, with *k* = 3.
+  Committed in `cfa4653` at 2026-11-17T17:53:19, before any sweep-4 run started.
 
 **The results**, from `results/`.
 
-| Arm | Runs | Measure: mean (SD) | Score: mean (SD) | pass@k | pass^k | Facts right | Cost per run |
+| Arm | Runs | Measure: mean (SD) | Score: mean (SD) | pass@3 | pass^3 | Facts right | Cost per run |
 |---|---|---|---|---|---|---|---|
-| A | | | | | | | |
-| B | | | | | | | |
+| A, examples on | 45 | 2.378 (0.390) | 6.67 (6.09) | 0.111 | 0.011 | 69.7% | $0.00177 |
+| B, examples off | 45 | 5.044 (0.435) | 13.33 (9.30) | 0.211 | 0.044 | 70.6% | $0.00148 |
 
 | Stratum | Gain | 95% interval |
 |---|---|---|
-| All tasks | | |
-| routine | | |
-| unusual | | |
-| adversarial | | |
-| should-not-act | | |
+| All tasks | +2.667 | [2.155, 3.178] |
+| routine | +3.800 | [2.813, 4.787] |
+| unusual | +2.100 | [0.932, 3.268] |
+| adversarial | +1.100 | [-0.334, 2.534] |
+| should-not-act | +3.100 | [1.714, 4.486] |
 
-- The verdict, by your bar, and why:
-- Cost beside the score (slide 54):
-- Each part of your prediction that missed, and the run that shows why:
+- **The verdict, by your bar, and why: holds.** The interval's low end, 2.155, is above the
+  bar of 0.0, so the gap is not an artifact of which sweeps happened to run. Every stratum
+  clears the floor of -0.5, the smallest being adversarial at +1.100. Note that
+  adversarial's own interval, [-0.334, 2.534], crosses zero: the gap is real across the
+  subset as a whole, and on adversarial tasks alone these ten runs cannot tell.
+
+- **Cost beside the score (slide 54): the claim holds and acting on it would still be
+  wrong.** Arm B wastes twice the calls and scores twice as well, 13.33 against 6.67, with
+  pass@3 at 0.211 against 0.111. It is also cheaper per run, $0.00148 against $0.00177,
+  because the examples are tokens in every prompt. Arm A left six runs that called no tool
+  at all; arm B left none. So the examples buy tidier traces, not better triage, and the
+  measure I chose cannot see the thing worth having. A claim can be settled and still be
+  the wrong claim, which is the part of this that was worth learning.
+
+- **Each part of your prediction that missed, and the run that shows why:** the arm was
+  right, A, and the stratum was right, routine, at +3.800. The size missed: I committed 2.0
+  and measured 2.667, and the interval [2.155, 3.178] excludes 2.0, so it missed low rather
+  than merely being imprecise. `planned-g02-s04-847e73` shows why. Without the examples that
+  run had `issues_read`, `issues_label` and `issues_comment` all rejected for malformed
+  arguments, one `code_read_file` error and three empty searches: seven wasted calls in a
+  two-step run. I had expected malformed arguments to cluster in the read tools, where the
+  arguments are paths and queries. They hit the write tools just as hard, and that is what
+  carried should-not-act to +3.100 when I expected that stratum to be modest.
 
 **Where the failed runs first went wrong** (slide 29), last good step down the side, first wrong step across.
 
 ```
+arm A, 42 failed runs                      arm B, 39 failed runs
+
+last good        -> first wrong   count     last good        -> first wrong   count
+code_search         code_read_file   18     issues_label        stop             20
+issues_label        stop              9     code_search         code_read_file   11
+code_read_file      issues_label      6     code_read_file      issues_label      5
+start               stop              4     code_search         code_search       2
+issues_label        pulls_open        3     issues_label        pulls_open        1
+code_search         issues_label      1
+issues_comment      stop              1
 ```
 
-- The biggest count, and whether its cause is local, upstream or structural:
-- How a replay from Assignment 4's checkpoints would confirm it:
-- Runs that called no tool:
+- **The biggest count, and whether its cause is local, upstream or structural:** arm B's
+  `issues_label -> stop`, 20 of its 39 failures. The run labelled the issue and then ended
+  without ever writing the comment the task needed. The cause is **upstream**, not local to
+  the label step: nothing is wrong with the labelling call, and the run had a comment left
+  to write. It had spent its turns on the wasted calls counted above, so the budget ran out
+  before the last step of the plan. Arm A shows the same shape nine times instead of twenty,
+  close to the ratio of wasted calls between the arms. The second count, arm A's
+  `code_search -> code_read_file` at 18, is a different and genuinely local fault: the search
+  returned hits and the run opened the wrong one.
+
+- **How a replay from Assignment 4's checkpoints would confirm it:** resume each of the 20
+  from its checkpoint immediately after `issues_label`, with the turn budget restored, and
+  change nothing else. If they then write the comment, the fault was the budget and the
+  wasted calls that drained it, which is the upstream reading. If they still stop, the fault
+  is in the plan's own ordering, which puts the comment after the label, and the reading is
+  structural instead. The same replay separates the two for arm A's nine.
+
+- **Runs that called no tool:** six, all in arm A, on tasks g08, g14 and g18
+  (`planned-g08-s01-e3803d`, `planned-g14-s02-b4173e`, `planned-g14-s03-f30fd5`,
+  `planned-g14-s04-177981`, `planned-g18-s04-714301`, `planned-g18-s05-f264fa`). Arm B had
+  none. Slide 28 calls this the largest single kind of failure. `eval/metrics.py` reports
+  `precision` as null rather than zero for these, since a run that called nothing has no
+  precision to report, and records `step_count` as the negative of the task's reference count.
 
 ## Part D · Validate a judge
 
@@ -167,6 +244,14 @@ off the run, neither task could ever fail.
 - What moved on the reformatted and lengthened versions:
 - Its rates on each system:
 - What validating the judge still needs:
+
+## Note on the `fixtures/judge/` integrity flag
+
+The fixtures are unmodified. `sha()` at `checks/check_07.py:135` folds
+`str(f.relative_to(path))` into the hash, which yields `outputs\j01.json` on Windows and
+`outputs/j01.json` elsewhere. Hashing the same bytes with `.as_posix()` reproduces the
+expected `0920675979cd96a9` exactly. `fixtures/judge/` is the only pinned directory with
+a nested subdirectory, which is why the two flat ones do not flag.
 
 ## AI assistance
 
